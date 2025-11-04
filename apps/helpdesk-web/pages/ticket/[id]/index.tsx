@@ -205,7 +205,7 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                             </Typography.Text>
                                         </Col>
                                         <Col span={24}>
-                                            {
+                                            {/* {
                                                 !isResidentTicket && !canReadByResident && (
                                                     <Typography.Text type='secondary' style={TICKET_CREATE_INFO_TEXT_STYLE}>
                                                         <FormattedMessage
@@ -214,7 +214,7 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                                         />
                                                     </Typography.Text>
                                                 )
-                                            }
+                                            } */}
                                         </Col>
                                     </Row>
                                 </Col>
@@ -298,20 +298,20 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                         {EmergencyMessage}
                                     </TicketTag>
                                 )}
-                                {isPayable && (
+                                {/* {isPayable && (
                                     <TicketTag
                                         style={TICKET_TYPE_TAG_STYLE.payable}
                                     >
                                         {PayableMessage}
                                     </TicketTag>
-                                )}
-                                {isWarranty && (
+                                )} */}
+                                {/* {isWarranty && (
                                     <TicketTag
                                         style={TICKET_TYPE_TAG_STYLE.warranty}
                                     >
                                         {WarrantyMessage}
                                     </TicketTag>
-                                )}
+                                )} */}
                                 {
                                     statusReopenedCounter > 0 && (
                                         <TicketTag
@@ -323,9 +323,9 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                 }
                             </Space>
                         </Col>
-                        <Col span={!breakpoints.TABLET_LARGE && 24}>
+                        {/* <Col span={!breakpoints.TABLET_LARGE && 24}>
                             <TicketResidentFeatures ticket={ticket}/>
-                        </Col>
+                        </Col> */}
                     </Row>
                 </Col>
             </Row>
@@ -340,11 +340,11 @@ const TicketContent = ({ ticket }) => {
                 <TicketQualityControlFields ticket={ticket}/>
                 <TicketFeedbackFields ticket={ticket}/>
                 <TicketDeadlineField ticket={ticket}/>
-                <TicketPropertyField ticket={ticket}/>
+                {/* <TicketPropertyField ticket={ticket}/> */}
                 <TicketClientField ticket={ticket}/>
                 <TicketDetailsField ticket={ticket}/>
                 <TicketFileListField ticket={ticket}/>
-                <TicketClassifierField ticket={ticket}/>
+                {/* <TicketClassifierField ticket={ticket}/> */}
                 <TicketExecutorField ticket={ticket}/>
                 <TicketAssigneeField ticket={ticket}/>
             </Row>
@@ -444,11 +444,11 @@ const TicketActionBar = ({
                         </Button>
                     </Link>
                 ),
-                <TicketDocumentGenerationButton key='generateDocument' />,
-                breakpoints.TABLET_LARGE && <>
-                    <TicketBlanksExportToPdfButton/>
-                    {TicketBlanksExportToPdfModal}
-                </>,
+                // <TicketDocumentGenerationButton key='generateDocument' />,
+                // breakpoints.TABLET_LARGE && <>
+                //     <TicketBlanksExportToPdfButton/>
+                //     {TicketBlanksExportToPdfModal}
+                // </>,
                 canShareTickets && (
                     <ShareTicketModal
                         key='share'
