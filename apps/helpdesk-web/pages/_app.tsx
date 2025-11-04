@@ -12,6 +12,7 @@ import getConfig from 'next/config'
 import DefaultErrorPage from 'next/error'
 import React, { Fragment, useMemo } from 'react'
 
+import { FeaturesReady, withFeatureFlags } from '@open-condo/featureflags/FeatureFlagsContext'
 import * as AllIcons from '@open-condo/icons'
 import { extractReqLocale } from '@open-condo/locales/extractReqLocale'
 import { isSSR } from '@open-condo/miniapp-utils'
@@ -20,6 +21,7 @@ import { useAuth, withAuth } from '@open-condo/next/auth'
 import { useIntl, withIntl } from '@open-condo/next/intl'
 import { useOrganization, withOrganization } from '@open-condo/next/organization'
 
+import BaseLayout from '@helpdesk-web/domains/common/components/containers/BaseLayout'
 import GlobalErrorBoundary from '@condo/domains/common/components/containers/GlobalErrorBoundery'
 import GlobalStyle from '@condo/domains/common/components/containers/GlobalStyle'
 import YandexMetrika from '@condo/domains/common/components/containers/YandexMetrika'
@@ -38,6 +40,7 @@ import {
     MINIAPPS_CATEGORY, RESIDENTS_CATEGORY, SETTINGS_CATEGORY,
 
 } from '@condo/domains/common/constants/menuCategories'
+import { useHotCodeReload } from '@condo/domains/common/hooks/useHotCodeReload'
 import { prefetchAuthOrRedirect } from '@condo/domains/common/utils/next/auth'
 import { nextRedirect } from '@condo/domains/common/utils/next/helpers'
 import { prefetchOrganizationEmployee } from '@condo/domains/common/utils/next/organization'
@@ -61,7 +64,6 @@ import {
 } from '@condo/domains/ticket/hooks/useTicketDocumentGenerationTaskUIInterface'
 import { useTicketExportTaskUIInterface } from '@condo/domains/ticket/hooks/useTicketExportTaskUIInterface'
 import { SudoTokenProvider } from '@condo/domains/user/components/SudoTokenProvider'
-import BaseLayout from '@helpdesk-web/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@helpdesk-web/domains/common/types'
 import { messagesImporter } from '@helpdesk-web/domains/common/utils/messagesImporter'
 import { apolloHelperOptions } from '@helpdesk-web/domains/common/utils/next/apollo'
@@ -279,6 +281,7 @@ const TasksProvider = ({ children }) => {
 
 const MyApp = ({ Component, pageProps }) => {
     const intl = useIntl()
+    useHotCodeReload()
     dayjs.locale(intl.locale)
 
     const LayoutComponent = Component.container || BaseLayout
@@ -301,7 +304,9 @@ const MyApp = ({ Component, pageProps }) => {
                                                 <ActiveCallContextProvider>
                                                     <LayoutComponent menuData={<MenuItems/>} headerAction={HeaderAction}>
                                                         <RequiredAccess>
-                                                            <Component {...pageProps} />
+                                                            <FeaturesReady fallback={<Loader fill size='large'/>}>
+                                                                <Component {...pageProps} />
+                                                            </FeaturesReady>
                                                         </RequiredAccess>
                                                     </LayoutComponent>
                                                 </ActiveCallContextProvider>
@@ -472,8 +477,10 @@ export default (
             withAuth({ legacy: false, USER_QUERY: AuthenticatedUserDocument })(
                 withIntl({ ssr: !isDisabledSsr, messagesImporter, extractReqLocale, defaultLocale })(
                     withOrganization({ legacy: false, GET_ORGANIZATION_EMPLOYEE_QUERY: GetActiveOrganizationEmployeeDocument, useInitialEmployeeId })(
-                        withError()(
-                            MyApp
+                        withFeatureFlags({ ssr: !isDisabledSsr })(
+                            withError()(
+                                MyApp
+                            )
                         )
                     )
                 )

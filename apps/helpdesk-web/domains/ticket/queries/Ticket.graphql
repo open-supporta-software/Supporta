@@ -19,6 +19,7 @@ query getTickets ($where: TicketWhereInput!, $sortBy: [SortTicketsBy!], $first: 
         lastCommentWithResidentTypeAt
         lastCommentWithOrganizationTypeAt
         lastCommentWithResidentTypeCreatedByUserType
+        propertyAddressMeta { ...AddressMetaForTableAddress }
         propertyAddress
         sectionType
         sectionName
@@ -60,6 +61,7 @@ query getTickets ($where: TicketWhereInput!, $sortBy: [SortTicketsBy!], $first: 
             id
             deletedAt
             address
+            addressMeta { ...AddressMetaForTableAddress }
         }
         status {
             id
@@ -96,6 +98,7 @@ query getTicketsForClientCard ($where: TicketWhereInput!, $sortBy: [SortTicketsB
         number
         createdAt
         lastCommentAt
+        propertyAddressMeta { ...AddressMetaForTableAddress }
         propertyAddress
         sectionType
         isEmergency
@@ -134,7 +137,15 @@ query getTicketsForClientCard ($where: TicketWhereInput!, $sortBy: [SortTicketsB
             id
             deletedAt
             address
-
+            addressMeta { ...AddressMetaForTableAddress }
+            map {
+                sections {
+                    ...SectionOrParkingInfo
+                }
+                parking {
+                    ...SectionOrParkingInfo
+                }
+            }
         }
         status {
             id
@@ -208,6 +219,7 @@ query getTicketById ($id: ID!) {
         id
         number
         propertyAddress
+        propertyAddressMeta { ...AddressMetaForTableAddress }
         createdAt
         isEmergency
         isPayable
@@ -252,6 +264,7 @@ query getTicketById ($id: ID!) {
             id
             deletedAt
             address
+            addressMeta { ...AddressMetaForTableAddress }
         }
         classifier {
             id

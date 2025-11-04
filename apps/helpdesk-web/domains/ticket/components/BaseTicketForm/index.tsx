@@ -484,6 +484,62 @@ export const TicketInfo = ({ organizationId, form, validations, UploadComponent,
                 <Col>
                     <FrontLayerContainer showLayer={disableUserInteraction} isSelectable={false} style={TICKET_INFO_FRONT_LAYOUT_CONTAINER_STYLE}>
                         <Row gutter={BIG_VERTICAL_GUTTER}>
+                            <Col span={24}>
+                                <Row gutter={MEDIUM_VERTICAL_GUTTER}>
+                                    <Col span={24}>
+                                        <Row gutter={SMALL_VERTICAL_GUTTER}>
+                                            <Col span={24}>
+                                                <Typography.Title level={3}>{ClassifierLabel}</Typography.Title>
+                                            </Col>
+                                            <Col span={24}>
+                                                <ClassifiersEditorComponent form={form} disabled={disableUserInteraction}/>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                    <Col span={24}>
+                                        <Row gutter={MEDIUM_HORIZONTAL_GUTTER}>
+                                            <Col span={24} lg={6}>
+                                                <Form.Item name='isEmergency' valuePropName='checked'>
+                                                    <Checkbox
+                                                        disabled={disableUserInteraction}
+                                                        id='ticket-is-emergency'
+                                                        onChange={handleChangeType}
+                                                    >
+                                                        {EmergencyLabel}
+                                                    </Checkbox>
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={24} lg={6}>
+                                                <Tooltip title={disableIsPayableCheckbox && CancelTicketInvoicesMessage}>
+                                                    <Form.Item
+                                                        name='isPayable'
+                                                        valuePropName='checked'
+                                                    >
+                                                        <Checkbox
+                                                            disabled={disableUserInteraction || disableIsPayableCheckbox}
+                                                            id='ticket-is-payable'
+                                                            onChange={handlePayableChange}
+                                                        >
+                                                            {PayableLabel}
+                                                        </Checkbox>
+                                                    </Form.Item>
+                                                </Tooltip>
+                                            </Col>
+                                            <Col span={24} lg={6}>
+                                                <Form.Item name='isWarranty' valuePropName='checked'>
+                                                    <Checkbox
+                                                        disabled={disableUserInteraction}
+                                                        id='ticket-is-warranty'
+                                                        onChange={handleChangeType}
+                                                    >
+                                                        {WarrantyLabel}
+                                                    </Checkbox>
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            </Col>
                             {
                                 isNoServiceProviderOrganization && isPayable && (
                                     <>
@@ -727,6 +783,17 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
 
     const organizationId = get(property, ['organization', 'id'], null)
 
+    const addressValidation = useCallback((_, value) => {
+        const searchValueLength = get(value, 'length', 0)
+        if (searchValueLength === 0) {
+            return Promise.resolve()
+        }
+
+        return !isEmpty(selectedPropertyId) ? Promise.resolve() : Promise.reject(AddressNotSelected)
+    }, [selectedPropertyId, AddressNotSelected])
+
+    const PROPERTY_VALIDATION_RULES = useMemo(() => [...validations.property, { validator: addressValidation }], [addressValidation, validations.property])
+
     const action = async (variables, ...args) => {
         const { details, ...otherVariables } = variables
 
@@ -758,7 +825,9 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
         return result
     }
 
+    const initialCanReadByResidentValue = useMemo(() => get(initialValues, 'canReadByResident', true), [initialValues])
 
+    const isResidentTicket = useMemo(() => get(initialValues, ['createdByType']) === RESIDENT, [initialValues])
     const ErrorToFormFieldMsgMapping = useMemo(() => ({
         [PROPERTY_REQUIRED_ERROR]: {
             name: 'property',
@@ -779,7 +848,37 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
         return values
     }, [])
 
+    const handlePropertySelectChange = useCallback((form) => (_, option) => {
+        setIsPropertyChanged(true)
+        form.setFieldsValue({
+            unitName: null,
+            unitType: null,
+            sectionName: null,
+            sectionType: null,
+            floorName: null,
+            property: option.key,
+        })
+        setSelectedUnitName(null)
+        setSelectedUnitType(null)
+        setSelectedSectionType(null)
+        setSelectedPropertyId(option.key)
+    }, [])
 
+    const handlePropertiesSelectClear = useCallback((form) => () => {
+        setIsPropertyChanged(true)
+        form.setFieldsValue({
+            unitName: null,
+            unitType: null,
+            sectionName: null,
+            sectionType: null,
+            floorName: null,
+            property: null,
+        })
+        setSelectedUnitName(null)
+        setSelectedUnitType(null)
+        setSelectedSectionType(null)
+        setSelectedPropertyId(null)
+    }, [])
 
     const propertyInfoColSpan = !breakpoints.TABLET_LARGE ? 24 : 17
 
@@ -878,6 +977,49 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
                                                     <Row gutter={BIG_HORIZONTAL_GUTTER} justify='space-between'>
                                                         <Col span={24}>
                                                             <Row gutter={BIG_VERTICAL_GUTTER}>
+                                                                <Col span={24}>
+                                                                    <Row gutter={SMALL_VERTICAL_GUTTER}>
+                                                                        <Col span={24} data-cy='ticket__property-address-search-input'>
+                                                                            <TicketFormItem
+                                                                                name='property'
+                                                                                label={AddressLabel}
+                                                                                rules={PROPERTY_VALIDATION_RULES}
+                                                                                tooltip={<PropertyFormItemTooltip />}
+                                                                            >
+                                                                                <PropertyAddressSearchInput
+                                                                                    organizationId={get(organization, 'id')}
+                                                                                    autoFocus
+                                                                                    onSelect={handlePropertySelectChange(form)}
+                                                                                    onClear={handlePropertiesSelectClear(form)}
+                                                                                    placeholder={AddressPlaceholder}
+                                                                                    disabled={!isEmpty(invoices)}
+                                                                                />
+                                                                            </TicketFormItem>
+                                                                        </Col>
+                                                                        {selectedPropertyId && (
+                                                                            <UnitInfo
+                                                                                property={property}
+                                                                                loading={organizationPropertiesLoading}
+                                                                                setSelectedUnitName={setSelectedUnitName}
+                                                                                setSelectedUnitType={setSelectedUnitType}
+                                                                                selectedUnitName={selectedUnitName}
+                                                                                setSelectedSectionType={setSelectedSectionType}
+                                                                                selectedSectionType={selectedSectionType}
+                                                                                mode={UnitInfoMode.All}
+                                                                                initialValues={initialTicketValues}
+                                                                                form={form}
+                                                                                disabled={!isEmpty(initialNotDraftInvoices)}
+                                                                            />
+                                                                        )}
+                                                                    </Row>
+                                                                </Col>
+                                                                {
+                                                                    selectedPropertyId && !breakpoints.DESKTOP_LARGE && (
+                                                                        <Col span={24}>
+                                                                            {hintsBlock}
+                                                                        </Col>
+                                                                    )
+                                                                }
                                                                 <ContactsInfo
                                                                     ContactsEditorComponent={ContactsEditorComponent}
                                                                     form={form}
@@ -893,7 +1035,7 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
                                                     </Row>
                                                 </Col>
                                                 <Col span={24}>
-                                                    <Form.Item noStyle dependencies={['categoryClassifier']} shouldUpdate>
+                                                    <Form.Item noStyle dependencies={['property', 'categoryClassifier']} shouldUpdate>
                                                         {
                                                             ({ getFieldsValue }) => {
                                                                 const {
@@ -901,7 +1043,7 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
                                                                     categoryClassifier,
                                                                 } = getFieldsValue(['property', 'categoryClassifier'])
 
-                                                                const disableUserInteraction = false
+                                                                const disableUserInteraction = !property
 
                                                                 return (
                                                                     <Row gutter={BIG_VERTICAL_GUTTER}>
@@ -925,6 +1067,29 @@ export const BaseTicketForm: React.FC<ITicketFormProps> = (props) => {
                                                                                         categoryClassifier={categoryClassifier}
                                                                                         form={form}
                                                                                     />
+                                                                                    {
+                                                                                        // !isResidentTicket && (
+                                                                                        //     <Col span={24}>
+                                                                                        //         <Form.Item name='canReadByResident' valuePropName='checked' initialValue={initialCanReadByResidentValue}>
+                                                                                        //             <Checkbox
+                                                                                        //                 disabled={disableUserInteraction}
+                                                                                        //                 id='ticket-can-read-by-resident'
+                                                                                        //             >
+                                                                                        //                 <div style={CAN_READ_BY_RESIDENT_WRAPPER_STYLE}>
+                                                                                        //                     <Typography.Text>
+                                                                                        //                         {CanReadByResidentMessage}
+                                                                                        //                     </Typography.Text>
+                                                                                        //                     <Tooltip title={CanReadByResidentTooltip}>
+                                                                                        //                         <div style={CAN_READ_BY_RESIDENT_ICON_WRAPPER_STYLE}>
+                                                                                        //                             <QuestionCircle size='small' />
+                                                                                        //                         </div>
+                                                                                        //                     </Tooltip>
+                                                                                        //                 </div>
+                                                                                        //             </Checkbox>
+                                                                                        //         </Form.Item>
+                                                                                        //     </Col>
+                                                                                        // )
+                                                                                    }
                                                                                     {
                                                                                         !isExisted && isCallActive && (
                                                                                             <Col span={24}>

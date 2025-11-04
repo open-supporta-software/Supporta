@@ -7,15 +7,13 @@ import {
     useGetTicketCommentsQuery,
     useGetTicketLastCommentsTimeQuery, useGetUserTicketCommentsReadTimeQuery,
     useUpdateTicketCommentMutation,
-    useUpdateTicketMutation,
     useCreateUserTicketCommentReadTimeMutation,
     useUpdateUserTicketCommentReadTimeMutation, useGetTicketInvoicesQuery, GetIncidentsQuery,
 } from '@app/condo/gql'
 import { B2BAppGlobalFeature } from '@app/condo/schema'
-import { Affix, Col, ColProps, notification, Row, RowProps, Space } from 'antd'
+import { Affix, Col, ColProps, notification, Row, RowProps, Space, Typography } from 'antd'
 import dayjs from 'dayjs'
 import compact from 'lodash/compact'
-import debounce from 'lodash/debounce'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import map from 'lodash/map'
@@ -24,20 +22,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react'
 
-
 import { useCachePersistor } from '@open-condo/apollo'
 import { Link as LinkIcon } from '@open-condo/icons'
-import { getClientSideSenderInfo } from '@open-condo/miniapp-utils/helpers/sender'
 import { useAuth } from '@open-condo/next/auth'
 import { FormattedMessage } from '@open-condo/next/intl'
 import { useIntl } from '@open-condo/next/intl'
 import { useOrganization } from '@open-condo/next/organization'
-import {
-    ActionBar,
-    Alert,
-    Button,
-    Typography,
-} from '@open-condo/ui'
+import { ActionBar, Alert, Button } from '@open-condo/ui'
 
 import { ChangeHistory } from '@condo/domains/common/components/ChangeHistory'
 import { HistoricalChange } from '@condo/domains/common/components/ChangeHistory/HistoricalChange'
@@ -89,7 +80,7 @@ import {
 } from '@condo/domains/ticket/contexts/TicketQualityControlContext'
 import { useTicketVisibility } from '@condo/domains/ticket/contexts/TicketVisibilityContext'
 import { usePollTicketComments } from '@condo/domains/ticket/hooks/usePollTicketComments'
-import { hasTicketChangeDiff, useTicketChangedFieldMessagesOf } from '@condo/domains/ticket/hooks/useTicketChangedFieldMessagesOf'
+import { useTicketChangedFieldMessagesOf } from '@condo/domains/ticket/hooks/useTicketChangedFieldMessagesOf'
 import { useTicketDocumentGenerationTask } from '@condo/domains/ticket/hooks/useTicketDocumentGenerationTask'
 import { useTicketExportToPdfTask } from '@condo/domains/ticket/hooks/useTicketExportToPdfTask'
 import {
@@ -102,6 +93,7 @@ import {
 import { prefetchTicket } from '@condo/domains/ticket/utils/next/Ticket'
 import { UserNameField } from '@condo/domains/user/components/UserNameField'
 import { RESIDENT } from '@condo/domains/user/constants/common'
+
 
 const TICKET_CONTENT_VERTICAL_GUTTER: RowProps['gutter'] = [0, 40]
 const BIG_VERTICAL_GUTTER: RowProps['gutter'] = [0, 40]
@@ -178,9 +170,8 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                         <Col xl={13} md={11} xs={24}>
                             <Row gutter={SMALL_VERTICAL_GUTTER} align='middle'>
                                 <Col span={breakpoints.TABLET_LARGE ? 24 : 22}>
-                                    <Typography.Title level={1}>
-                                        {TicketTitleMessage}
-                                    </Typography.Title>
+                                    <Typography.Title style={TITLE_STYLE}
+                                        level={1}>{TicketTitleMessage}</Typography.Title>
                                 </Col>
                                 {
                                     !breakpoints.TABLET_LARGE && (
@@ -194,38 +185,36 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                 <Col id='ticket__create-info' span={24}>
                                     <Row>
                                         <Col span={24}>
-                                            <Typography.Text type='secondary' size='small'>
-                                                {TicketCreationDate}, {TicketAuthorMessage}{' '}
+                                            <Typography.Text style={TICKET_CREATE_INFO_TEXT_STYLE}>
+                                                <Typography.Text style={TICKET_CREATE_INFO_TEXT_STYLE}
+                                                    type='secondary'>{TicketCreationDate}, {TicketAuthorMessage} </Typography.Text>
+                                                <UserNameField user={createdBy}>
+                                                    {({ name, postfix }) => (
+                                                        <Typography.Text style={TICKET_CREATE_INFO_TEXT_STYLE}>
+                                                            {name}
+                                                            {postfix && <Typography.Text type='secondary'
+                                                                ellipsis>&nbsp;{postfix}</Typography.Text>}
+                                                        </Typography.Text>
+                                                    )}
+                                                </UserNameField>
                                             </Typography.Text>
-                                            <UserNameField user={createdBy}>
-                                                {({ name, postfix }) => (
-                                                    <Typography.Text size='small'>
-                                                        {name}
-                                                        {postfix && (
-                                                            <Typography.Text type='secondary' size='small'>
-                                                                &nbsp;{postfix}
-                                                            </Typography.Text>
-                                                        )}
-                                                    </Typography.Text>
-                                                )}
-                                            </UserNameField>
                                         </Col>
                                         <Col span={24}>
-                                            <Typography.Text type='secondary' size='small'>
+                                            <Typography.Text type='secondary' style={TICKET_CREATE_INFO_TEXT_STYLE}>
                                                 {SourceMessage} — {sourceName}
                                             </Typography.Text>
                                         </Col>
                                         <Col span={24}>
-                                            {/* {
+                                            {
                                                 !isResidentTicket && !canReadByResident && (
-                                                    <Typography.Text type='secondary' size='small'>
+                                                    <Typography.Text type='secondary' style={TICKET_CREATE_INFO_TEXT_STYLE}>
                                                         <FormattedMessage
                                                             id='pages.condo.ticket.title.CanReadByResident'
                                                             values={canReadByResidentFormattedValue}
                                                         />
                                                     </Typography.Text>
                                                 )
-                                            } */}
+                                            }
                                         </Col>
                                     </Row>
                                 </Col>
@@ -255,19 +244,14 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                         </Col>
                                         {
                                             statusUpdatedAt && (
-                                                <Col id='ticket__update-info'>
-                                                    <Row justify='end'>
-                                                        <Col offset={4}>
-                                                            <Typography.Text size='small'>
-                                                                {ChangedMessage}: {formattedStatusUpdatedAt}
-                                                            </Typography.Text>
-                                                        </Col>
-                                                        <Col>
-                                                            <Typography.Text type='secondary' size='small'>
-                                                                {TimeHasPassedMessage.replace('{time}', getTimeSinceCreation())}
-                                                            </Typography.Text>
-                                                        </Col>
-                                                    </Row>
+                                                <Col>
+                                                    <Typography.Paragraph style={TICKET_UPDATE_INFO_TEXT_STYLE}>
+                                                        {ChangedMessage}: {formattedStatusUpdatedAt}
+                                                    </Typography.Paragraph>
+                                                    <Typography.Paragraph style={TICKET_UPDATE_INFO_TEXT_STYLE}
+                                                        type='secondary'>
+                                                        {TimeHasPassedMessage.replace('{time}', getTimeSinceCreation())}
+                                                    </Typography.Paragraph>
                                                 </Col>
                                             )
                                         }
@@ -285,19 +269,14 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                         </Col>
                                         {
                                             statusUpdatedAt && (
-                                                <Col id='ticket__update-info'>
-                                                    <Row justify='end'>
-                                                        <Col offset={4}>
-                                                            <Typography.Text size='small'>
-                                                                {ChangedMessage}: {formattedStatusUpdatedAt}
-                                                            </Typography.Text>
-                                                        </Col>
-                                                        <Col>
-                                                            <Typography.Text type='secondary' size='small'>
-                                                                {TimeHasPassedMessage.replace('{time}', getTimeSinceCreation())}
-                                                            </Typography.Text>
-                                                        </Col>
-                                                    </Row>
+                                                <Col>
+                                                    <Typography.Paragraph style={TICKET_UPDATE_INFO_TEXT_STYLE}>
+                                                        {ChangedMessage}: {formattedStatusUpdatedAt}
+                                                    </Typography.Paragraph>
+                                                    <Typography.Paragraph style={TICKET_CREATE_INFO_TEXT_STYLE}
+                                                        type='secondary'>
+                                                        {TimeHasPassedMessage.replace('{time}', getTimeSinceCreation())}
+                                                    </Typography.Paragraph>
                                                 </Col>
                                             )
                                         }
@@ -319,20 +298,20 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                         {EmergencyMessage}
                                     </TicketTag>
                                 )}
-                                {/* {isPayable && (
+                                {isPayable && (
                                     <TicketTag
                                         style={TICKET_TYPE_TAG_STYLE.payable}
                                     >
                                         {PayableMessage}
                                     </TicketTag>
-                                )} */}
-                                {/* {isWarranty && (
+                                )}
+                                {isWarranty && (
                                     <TicketTag
                                         style={TICKET_TYPE_TAG_STYLE.warranty}
                                     >
                                         {WarrantyMessage}
                                     </TicketTag>
-                                )} */}
+                                )}
                                 {
                                     statusReopenedCounter > 0 && (
                                         <TicketTag
@@ -344,9 +323,9 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
                                 }
                             </Space>
                         </Col>
-                        {/* <Col span={!breakpoints.TABLET_LARGE && 24}>
+                        <Col span={!breakpoints.TABLET_LARGE && 24}>
                             <TicketResidentFeatures ticket={ticket}/>
-                        </Col> */}
+                        </Col>
                     </Row>
                 </Col>
             </Row>
@@ -354,18 +333,18 @@ const TicketHeader = ({ ticket, handleTicketStatusChanged, organization, employe
     )
 }
 
-const TicketContent = ({ ticket, ticketDetails, updateTicketDetails }) => {
+const TicketContent = ({ ticket }) => {
     return (
         <Col span={24}>
             <Row gutter={[0, 16]}>
                 <TicketQualityControlFields ticket={ticket}/>
                 <TicketFeedbackFields ticket={ticket}/>
                 <TicketDeadlineField ticket={ticket}/>
-                {/* <TicketPropertyField ticket={ticket}/> */}
+                <TicketPropertyField ticket={ticket}/>
                 <TicketClientField ticket={ticket}/>
-                <TicketDetailsField ticketDetails={ticketDetails} updateTicketDetails={updateTicketDetails}/>
+                <TicketDetailsField ticket={ticket}/>
                 <TicketFileListField ticket={ticket}/>
-                {/* <TicketClassifierField ticket={ticket}/> */}
+                <TicketClassifierField ticket={ticket}/>
                 <TicketExecutorField ticket={ticket}/>
                 <TicketAssigneeField ticket={ticket}/>
             </Row>
@@ -465,11 +444,11 @@ const TicketActionBar = ({
                         </Button>
                     </Link>
                 ),
-                // <TicketDocumentGenerationButton key='generateDocument' />,
-                // breakpoints.TABLET_LARGE && <>
-                //     <TicketBlanksExportToPdfButton/>
-                //     {TicketBlanksExportToPdfModal}
-                // </>,
+                <TicketDocumentGenerationButton key='generateDocument' />,
+                breakpoints.TABLET_LARGE && <>
+                    <TicketBlanksExportToPdfButton/>
+                    {TicketBlanksExportToPdfModal}
+                </>,
                 canShareTickets && (
                     <ShareTicketModal
                         key='share'
@@ -492,7 +471,10 @@ const TicketActionBar = ({
     )
 }
 
+const TICKET_CREATE_INFO_TEXT_STYLE: CSSProperties = { margin: 0, fontSize: '12px' }
+const TICKET_UPDATE_INFO_TEXT_STYLE: CSSProperties = { margin: 0, fontSize: '12px', textAlign: 'end' }
 const HINT_CARD_STYLE: CSSProperties = { maxHeight: '3em ' }
+const TITLE_STYLE: CSSProperties = { margin: 0 }
 const HINTS_COL_PROPS: ColProps = { span: 24 }
 const CopyMessageStyle: CSSProperties = { flexShrink: 1, whiteSpace: 'nowrap' }
 
@@ -574,12 +556,6 @@ export const TicketPageContent = ({ ticket, pollCommentsQuery, refetchTicket, or
 
     const id = useMemo(() => ticket?.id, [ticket?.id])
 
-    const [ticketDetails, setTicketDetails] = useState(ticket?.details)
-
-    useEffect(() => {
-        setTicketDetails(ticket?.details)
-    }, [ticket?.details])
-
     const {
         data: ticketChangesData,
         refetch: refetchTicketChanges,
@@ -590,11 +566,7 @@ export const TicketPageContent = ({ ticket, pollCommentsQuery, refetchTicket, or
         },
         skip: !persistor,
     })
-    const ticketChanges = useMemo(() => {
-        const changes = ticketChangesData?.ticketChanges?.filter(Boolean) || []
-
-        return changes.filter(hasTicketChangeDiff)
-    }, [ticketChangesData?.ticketChanges])
+    const ticketChanges = useMemo(() => ticketChangesData?.ticketChanges?.filter(Boolean) || [], [ticketChangesData?.ticketChanges])
     const ticketChangesCount = useMemo(() => ticketChanges.length, [ticketChanges.length])
 
     const {
@@ -629,30 +601,6 @@ export const TicketPageContent = ({ ticket, pollCommentsQuery, refetchTicket, or
             files: ticketCommentFiles.filter(file => file.ticketComment.id === comment.id),
         }
     }), [comments, ticketCommentFiles])
-
-    const [updateTicket] = useUpdateTicketMutation()
-    const debouncedUpdateTicket = useMemo(() => debounce(updateTicket, 500), [updateTicket])
-
-    const handleUpdateTicketDetails = async (newTicketDetails: string) => {
-        setTicketDetails(newTicketDetails)
-
-        await debouncedUpdateTicket({
-            variables: {
-                id: id,
-                data: {
-                    details: newTicketDetails,
-                    dv: 1,
-                    sender: getClientSideSenderInfo(),
-                },
-            },
-            onError: () => {
-                setTicketDetails(ticket?.details)
-                notification.error({
-                    message: intl.formatMessage({ id: 'ServerErrorPleaseTryAgainLater' }),
-                })
-            },
-        })
-    }
 
     const [updateComment] = useUpdateTicketCommentMutation({
         onCompleted: async () => {
@@ -767,7 +715,7 @@ export const TicketPageContent = ({ ticket, pollCommentsQuery, refetchTicket, or
                             )
                         }
                     </Row>
-                    <TicketContent ticket={ticket} ticketDetails={ticketDetails} updateTicketDetails={handleUpdateTicketDetails}/>
+                    <TicketContent ticket={ticket}/>
                     {
                         isNoServiceProviderOrganization && ticket.isPayable && (
                             <Col span={24}>
