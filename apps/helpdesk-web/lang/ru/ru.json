@@ -3526,11 +3526,8 @@
   "tour.newFeatures.resident.payBills": "Оплачивать квитанции в приложении Supporta",
   "tour.newFeatures.resident.readNews": "Узнавать новости через приложение",
   "tour.newFeatures.resident.readNewsByUnit": "Получать новости только по своим помещениям",
-<<<<<<< HEAD
   "tour.newFeatures.resident.readTicketsFromCRM": "Видеть созданные через CRM тикеты по их помещениям в приложении Supporta",
-=======
   "tour.newFeatures.resident.readTicketsFromSupporta": "Видеть созданные через Supporta заявки по их помещениям в приложении Supporta",
->>>>>>> d051ebb61 (chore: remove roles, settings, rename CRM)
   "tour.newFeatures.resident.takeReadingsFromResidents": "Принимать показания ИПУ от жителей",
   "tour.newFeatures.resident.title": "Жители могут:",
   "tour.newFeatures.resident.trackTicket": "Отслеживать выполнение тикеты в приложении Supporta",
