@@ -3,6 +3,20 @@
 
 import * as Types from '@app/condo/schema';
 
+export type GetExecutionAiFlowTaskByIdQueryVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+}>;
+
+
+export type GetExecutionAiFlowTaskByIdQuery = { __typename?: 'Query', task?: Array<{ __typename: 'ExecutionAIFlowTask', id: string, result?: any | null, errorMessage?: string | null, status?: Types.ExecutionAiFlowTaskStatusType | null } | null> | null };
+
+export type CreateExecutionAiFlowTaskMutationVariables = Types.Exact<{
+  data: Types.ExecutionAiFlowTaskCreateInput;
+}>;
+
+
+export type CreateExecutionAiFlowTaskMutation = { __typename?: 'Mutation', task?: { __typename?: 'ExecutionAIFlowTask', id: string, result?: any | null, errorMessage?: string | null, status?: Types.ExecutionAiFlowTaskStatusType | null } | null };
+
 export type GetProcessingTasksQueryVariables = Types.Exact<{
   userId: Types.Scalars['ID']['input'];
   createdAtGte: Types.Scalars['String']['input'];
@@ -17,6 +31,16 @@ export type GetAllMiniAppsQueryVariables = Types.Exact<{
 
 
 export type GetAllMiniAppsQuery = { __typename?: 'Query', allMiniApps?: Array<{ __typename?: 'MiniAppOutput', id: string, name: string, shortDescription?: string | null, connected: boolean, accessible: boolean, category: Types.AppCategory, logo?: string | null, label?: string | null, icon?: string | null, menuCategory?: string | null }> | null };
+
+export type GetAllB2BAppsQueryVariables = Types.Exact<{
+  where?: Types.InputMaybe<Types.B2BAppWhereInput>;
+  first?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  skip?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+  sortBy?: Types.InputMaybe<Array<Types.SortB2BAppsBy> | Types.SortB2BAppsBy>;
+}>;
+
+
+export type GetAllB2BAppsQuery = { __typename?: 'Query', objs?: Array<{ __typename?: 'B2BApp', id: string, name?: string | null, shortDescription?: string | null, detailedDescription?: string | null, icon?: Types.B2BAppIconType | null, category?: Types.B2BAppCategoryType | null, label?: Types.B2BAppLabelType | null, appUrl?: string | null, developer?: string | null, developerUrl?: string | null, isHidden?: boolean | null, isGlobal?: boolean | null, isPublic?: boolean | null, displayPriority?: number | null, menuCategory?: Types.B2BAppMenuCategoryType | null, createdAt?: string | null, updatedAt?: string | null, logo?: { __typename?: 'File', publicUrl?: string | null } | null } | null> | null };
 
 export type GetB2BAppsWithMessageSettingsQueryVariables = Types.Exact<{
   messageTypes?: Types.InputMaybe<Array<Types.InputMaybe<Types.MessageType>> | Types.InputMaybe<Types.MessageType>>;

@@ -14,3 +14,28 @@ query getAllMiniApps($data: AllMiniAppsInput!) {
         menuCategory
     }
 }
+
+query getAllB2BApps ($where: B2BAppWhereInput, $first: Int, $skip: Int, $sortBy: [SortB2BAppsBy!]) {
+    objs: allB2BApps (where: $where, first: $first, skip: $skip, sortBy: $sortBy) {
+        id
+        name
+        shortDescription
+        detailedDescription
+        icon
+        category
+        label
+        appUrl
+        logo {
+            publicUrl
+        }
+        developer
+        developerUrl
+        isHidden
+        isGlobal
+        isPublic
+        displayPriority
+        menuCategory
+        createdAt
+        updatedAt
+    }
+}

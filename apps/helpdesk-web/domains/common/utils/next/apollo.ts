@@ -79,11 +79,6 @@ const cacheConfig: InitCacheConfig = (cacheOptions) => {
                         read: listHelper.getReadFunction('paginate'),
                         merge: listHelper.mergeLists,
                     },
-                    allB2BApps: {
-                        keyArgs: ['where'],
-                        read: listHelper.getReadFunction('paginate'),
-                        merge: listHelper.mergeLists,
-                    },
                     allOrganizationEmployeeSpecializations: {
                         keyArgs: ['where'],
                         read: listHelper.getReadFunction('paginate'),
