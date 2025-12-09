@@ -10,6 +10,86 @@ export * from '@app/helpdesk-web/gql/operation.types'
 
 const defaultOptions = {} as const;
 
+export const GetExecutionAiFlowTaskByIdDocument = gql`
+    query getExecutionAIFlowTaskById($id: ID!) {
+  task: allExecutionAIFlowTasks(where: {id: $id}, first: 1) {
+    id
+    result
+    errorMessage
+    status
+    __typename
+  }
+}
+    `;
+
+/**
+ * __useGetExecutionAiFlowTaskByIdQuery__
+ *
+ * To run a query within a React component, call `useGetExecutionAiFlowTaskByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetExecutionAiFlowTaskByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetExecutionAiFlowTaskByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetExecutionAiFlowTaskByIdQuery(baseOptions: Apollo.QueryHookOptions<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables> & ({ variables: Types.GetExecutionAiFlowTaskByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>(GetExecutionAiFlowTaskByIdDocument, options);
+      }
+export function useGetExecutionAiFlowTaskByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>(GetExecutionAiFlowTaskByIdDocument, options);
+        }
+export function useGetExecutionAiFlowTaskByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>(GetExecutionAiFlowTaskByIdDocument, options);
+        }
+export type GetExecutionAiFlowTaskByIdQueryHookResult = ReturnType<typeof useGetExecutionAiFlowTaskByIdQuery>;
+export type GetExecutionAiFlowTaskByIdLazyQueryHookResult = ReturnType<typeof useGetExecutionAiFlowTaskByIdLazyQuery>;
+export type GetExecutionAiFlowTaskByIdSuspenseQueryHookResult = ReturnType<typeof useGetExecutionAiFlowTaskByIdSuspenseQuery>;
+export type GetExecutionAiFlowTaskByIdQueryResult = Apollo.QueryResult<Types.GetExecutionAiFlowTaskByIdQuery, Types.GetExecutionAiFlowTaskByIdQueryVariables>;
+export const CreateExecutionAiFlowTaskDocument = gql`
+    mutation createExecutionAIFlowTask($data: ExecutionAIFlowTaskCreateInput!) {
+  task: createExecutionAIFlowTask(data: $data) {
+    id
+    result
+    errorMessage
+    status
+  }
+}
+    `;
+export type CreateExecutionAiFlowTaskMutationFn = Apollo.MutationFunction<Types.CreateExecutionAiFlowTaskMutation, Types.CreateExecutionAiFlowTaskMutationVariables>;
+
+/**
+ * __useCreateExecutionAiFlowTaskMutation__
+ *
+ * To run a mutation, you first call `useCreateExecutionAiFlowTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateExecutionAiFlowTaskMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createExecutionAiFlowTaskMutation, { data, loading, error }] = useCreateExecutionAiFlowTaskMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useCreateExecutionAiFlowTaskMutation(baseOptions?: Apollo.MutationHookOptions<Types.CreateExecutionAiFlowTaskMutation, Types.CreateExecutionAiFlowTaskMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<Types.CreateExecutionAiFlowTaskMutation, Types.CreateExecutionAiFlowTaskMutationVariables>(CreateExecutionAiFlowTaskDocument, options);
+      }
+export type CreateExecutionAiFlowTaskMutationHookResult = ReturnType<typeof useCreateExecutionAiFlowTaskMutation>;
+export type CreateExecutionAiFlowTaskMutationResult = Apollo.MutationResult<Types.CreateExecutionAiFlowTaskMutation>;
+export type CreateExecutionAiFlowTaskMutationOptions = Apollo.BaseMutationOptions<Types.CreateExecutionAiFlowTaskMutation, Types.CreateExecutionAiFlowTaskMutationVariables>;
 export const GetProcessingTasksDocument = gql`
     query getProcessingTasks($userId: ID!, $createdAtGte: String!) {
   allTicketDocumentGenerationTasks(
@@ -217,6 +297,68 @@ export type GetAllMiniAppsQueryHookResult = ReturnType<typeof useGetAllMiniAppsQ
 export type GetAllMiniAppsLazyQueryHookResult = ReturnType<typeof useGetAllMiniAppsLazyQuery>;
 export type GetAllMiniAppsSuspenseQueryHookResult = ReturnType<typeof useGetAllMiniAppsSuspenseQuery>;
 export type GetAllMiniAppsQueryResult = Apollo.QueryResult<Types.GetAllMiniAppsQuery, Types.GetAllMiniAppsQueryVariables>;
+export const GetAllB2BAppsDocument = gql`
+    query getAllB2BApps($where: B2BAppWhereInput, $first: Int, $skip: Int, $sortBy: [SortB2BAppsBy!]) {
+  objs: allB2BApps(where: $where, first: $first, skip: $skip, sortBy: $sortBy) {
+    id
+    name
+    shortDescription
+    detailedDescription
+    icon
+    category
+    label
+    appUrl
+    logo {
+      publicUrl
+    }
+    developer
+    developerUrl
+    isHidden
+    isGlobal
+    isPublic
+    displayPriority
+    menuCategory
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetAllB2BAppsQuery__
+ *
+ * To run a query within a React component, call `useGetAllB2BAppsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllB2BAppsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllB2BAppsQuery({
+ *   variables: {
+ *      where: // value for 'where'
+ *      first: // value for 'first'
+ *      skip: // value for 'skip'
+ *      sortBy: // value for 'sortBy'
+ *   },
+ * });
+ */
+export function useGetAllB2BAppsQuery(baseOptions?: Apollo.QueryHookOptions<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>(GetAllB2BAppsDocument, options);
+      }
+export function useGetAllB2BAppsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>(GetAllB2BAppsDocument, options);
+        }
+export function useGetAllB2BAppsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>(GetAllB2BAppsDocument, options);
+        }
+export type GetAllB2BAppsQueryHookResult = ReturnType<typeof useGetAllB2BAppsQuery>;
+export type GetAllB2BAppsLazyQueryHookResult = ReturnType<typeof useGetAllB2BAppsLazyQuery>;
+export type GetAllB2BAppsSuspenseQueryHookResult = ReturnType<typeof useGetAllB2BAppsSuspenseQuery>;
+export type GetAllB2BAppsQueryResult = Apollo.QueryResult<Types.GetAllB2BAppsQuery, Types.GetAllB2BAppsQueryVariables>;
 export const GetB2BAppsWithMessageSettingsDocument = gql`
     query getB2BAppsWithMessageSettings($messageTypes: [MessageType]) {
   settings: allAppMessageSettings(
