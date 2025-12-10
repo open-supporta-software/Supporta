@@ -1,0 +1,46 @@
+.nodeButton {
+    padding: 8px 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.nodeButton:hover {
+    opacity: 0.8;
+}
+
+.triggerButton {
+    background: #1890ff;
+}
+
+.ternaryButton {
+    background: #52c41a;
+}
+
+.conditionButton {
+    background: #faad14;
+}
+
+.actionButton {
+    background: #f5222d;
+}
+
+.flowContainer {
+    height: 600px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+}
+
+.nodeContainer {
+    padding: 16px;
+    border-radius: 8px;
+    min-width: 200px;
+}
+
+.nodeTitle {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
