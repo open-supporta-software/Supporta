@@ -9,6 +9,7 @@ import { getCurrentVersion } from '@condo/domains/common/utils/VersioningMiddlew
 import type { NextConfig } from 'next'
 
 const serverUrl = conf['CONDO_DOMAIN']
+const rulesServerDomain = conf['RULES_SERVER_DOMAIN'] || serverUrl
 const frontendUrl = conf['HELPDESK_WEB_DOMAIN']
 const apolloGraphQLUrl = `${frontendUrl}/api/graphql`
 const addressSuggestionsConfig = conf['ADDRESS_SUGGESTIONS_CONFIG'] && JSON.parse(conf['ADDRESS_SUGGESTIONS_CONFIG'])
@@ -64,6 +65,7 @@ const nextConfig: NextConfig = {
         // Will be available on both server and client
         frontendUrl,
         serverUrl,
+        rulesServerDomain,
         apolloGraphQLUrl,
         addressSuggestionsConfig,
         mapApiKey,

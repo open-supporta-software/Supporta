@@ -1,4 +1,4 @@
-import { Row, Col } from 'antd'
+import { Row, Col, notification } from 'antd'
 import { Gutter } from 'antd/es/grid/row'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -21,11 +21,13 @@ import ReactFlow, {
 import 'reactflow/dist/style.css'
 
 import { useIntl } from '@open-condo/next/intl'
+import { useOrganization } from '@open-condo/next/organization'
 import { Typography, Input, Alert, Button } from '@open-condo/ui'
 
 import { PageContent, PageWrapper } from '@condo/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@condo/domains/common/types'
 
+import { createRule } from './api'
 import { TriggerNode, TernaryNode, ConditionNode, ActionNode } from './components/CustomNodes'
 import { NodeType } from './types'
 
@@ -88,7 +90,7 @@ const isValidConnection = (
     }
 
     // Ternary and Condition can connect to anything except trigger
-    if ((sourceType === 'ternary' || sourceType === 'condition') && targetType !== 'trigger') {
+    if ((sourceType === 'ternary' || sourceType === 'condition')) {
         return { valid: true }
     }
 
@@ -99,6 +101,7 @@ const FlowContent: React.FC = () => {
     const { screenToFlowPosition } = useReactFlow()
     const intl = useIntl()
     const router = useRouter()
+    const { organization } = useOrganization()
     
     const PageTitle = 'Создание правила'
     const NameLabel = 'Название'
@@ -114,6 +117,7 @@ const FlowContent: React.FC = () => {
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
     const contextMenuPositionRef = useRef<{ x: number, y: number } | null>(null)
     const [isNodePanelOpen, setIsNodePanelOpen] = useState(true)
+    const [isSaving, setIsSaving] = useState(false)
 
     const onConnect = useCallback(
         (params: Connection | Edge) => {
@@ -181,7 +185,18 @@ const FlowContent: React.FC = () => {
         },
     }))
 
+    const hasTrigger = nodes.some(node => node.type === 'trigger')
+
     const addNode = (type: 'trigger' | 'ternary' | 'condition' | 'action', position?: { x: number, y: number }) => {
+        // Prevent adding more than one trigger
+        if (type === 'trigger' && hasTrigger) {
+            notification.error({
+                message: 'Ошибка',
+                description: 'Может быть только один триггер',
+            })
+            return
+        }
+
         const newNode: Node = {
             id: `${Date.now()}`,
             type,
@@ -216,27 +231,60 @@ const FlowContent: React.FC = () => {
         setContextMenu(null)
     }, [])
 
-    const handleSaveFlow = useCallback(() => {
+    const handleSaveFlow = useCallback(async () => {
+        if (!organization?.id) {
+            notification.error({
+                message: 'Ошибка',
+                description: 'Организация не выбрана',
+            })
+            return
+        }
+
         const flowData = {
-            name: ruleName,
-            description: ruleDescription,
             nodes: nodes.map(node => ({
                 id: node.id,
                 type: node.type,
                 position: node.position,
-                data: node.data,
+                data: {
+                    action: node.data.action,
+                    conditionValue: node.data.conditionValue,
+                },
             })),
             edges: edges.map(edge => ({
                 id: edge.id,
                 source: edge.source,
                 target: edge.target,
+                sourceHandle: edge.sourceHandle,
+                targetHandle: edge.targetHandle,
             })),
         }
         
-        console.log('Сохранение правила:', flowData)
-        // TODO: Здесь будет API запрос для сохранения
-        alert(`Правило "${ruleName}" сохранено!\n\nНоды: ${nodes.length}\nСоединения: ${edges.length}`)
-    }, [ruleName, ruleDescription, nodes, edges])
+        setIsSaving(true)
+        try {
+            const result = await createRule({
+                name: ruleName,
+                description: ruleDescription,
+                flow: JSON.stringify(flowData),
+                organization_id: organization.id,
+            })
+            
+            notification.success({
+                message: 'Успешно',
+                description: `Правило "${ruleName}" сохранено`,
+            })
+            
+            // Redirect to rules list or edit page
+            router.push('/rules')
+        } catch (error) {
+            console.error('Error saving rule:', error)
+            notification.error({
+                message: 'Ошибка',
+                description: error instanceof Error ? error.message : 'Не удалось сохранить правило',
+            })
+        } finally {
+            setIsSaving(false)
+        }
+    }, [ruleName, ruleDescription, nodes, edges, organization, router])
 
     const handleExportToJSON = useCallback(() => {
         const flowData = {
@@ -295,7 +343,6 @@ const FlowContent: React.FC = () => {
                                         value={ruleName}
                                         onChange={(e) => setRuleName(e.target.value)}
                                         placeholder={NamePlaceholder}
-                                        style={{ marginTop: '8px' }}
                                     />
                                 </Col>
                                 <Col span={24}>
@@ -318,7 +365,7 @@ const FlowContent: React.FC = () => {
                             </Col>
                         )}
                         <Col span={24}>
-                            <Typography.Text type='secondary' style={{ display: 'block', marginBottom: '8px' }}>
+                            <Typography.Text type='secondary'>
                                 Правила соединения: Триггер → (Тернарное выражение / Условие) → Действие
                             </Typography.Text>
                             <div style={{ height: '600px', border: '1px solid #d9d9d9', borderRadius: '8px', position: 'relative' }}>
@@ -390,24 +437,26 @@ const FlowContent: React.FC = () => {
                                                 gap: '8px',
                                             }}
                                         >
-                                            <button
-                                                onClick={() => addNode('trigger')}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    background: '#1890ff',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '14px',
-                                                    fontWeight: '500',
-                                                    transition: 'all 0.2s',
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.background = '#096dd9'}
-                                                onMouseLeave={(e) => e.currentTarget.style.background = '#1890ff'}
-                                            >
-                                                + Триггер
-                                            </button>
+                                            {!hasTrigger && (
+                                                <button
+                                                    onClick={() => addNode('trigger')}
+                                                    style={{
+                                                        padding: '8px 16px',
+                                                        background: '#1890ff',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '14px',
+                                                        fontWeight: '500',
+                                                        transition: 'all 0.2s',
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = '#096dd9'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = '#1890ff'}
+                                                >
+                                                    + Триггер
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => addNode('ternary')}
                                                 style={{
@@ -479,22 +528,24 @@ const FlowContent: React.FC = () => {
                                             minWidth: '200px',
                                         }}
                                     >
-                                        <div
-                                            onClick={() => addNode('trigger', contextMenuPositionRef.current || undefined)}
-                                            style={{
-                                                padding: '12px 16px',
-                                                cursor: 'pointer',
-                                                borderBottom: '1px solid #f0f0f0',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                                        >
-                                            <span style={{ color: '#1890ff', fontWeight: 'bold' }}>●</span>
-                                            Добавить Триггер
-                                        </div>
+                                        {!hasTrigger && (
+                                            <div
+                                                onClick={() => addNode('trigger', contextMenuPositionRef.current || undefined)}
+                                                style={{
+                                                    padding: '12px 16px',
+                                                    cursor: 'pointer',
+                                                    borderBottom: '1px solid #f0f0f0',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                            >
+                                                <span style={{ color: '#1890ff', fontWeight: 'bold' }}>●</span>
+                                                Добавить Триггер
+                                            </div>
+                                        )}
                                         <div
                                             onClick={() => addNode('ternary', contextMenuPositionRef.current || undefined)}
                                             style={{
@@ -571,7 +622,8 @@ const FlowContent: React.FC = () => {
                                             <Button
                                                 type='primary'
                                                 onClick={handleSaveFlow}
-                                                disabled={!ruleName || nodes.length === 0}
+                                                disabled={!ruleName || nodes.length === 0 || isSaving || !organization?.id}
+                                                loading={isSaving}
                                             >
                                                 Сохранить правило
                                             </Button>

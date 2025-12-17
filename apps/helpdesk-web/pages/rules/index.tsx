@@ -1,48 +1,30 @@
-import { Row, Col } from 'antd'
+import { Row, Col, notification } from 'antd'
 import { Gutter } from 'antd/es/grid/row'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState, useEffect } from 'react'
 
 import { useIntl } from '@open-condo/next/intl'
+import { useOrganization } from '@open-condo/next/organization'
 import { Typography, Button, ActionBar, Table } from '@open-condo/ui'
 import type { TableColumn, GetTableData } from '@open-condo/ui'
 
 import { PageContent, PageWrapper } from '@condo/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@condo/domains/common/types'
 
+import { getRules } from './api'
 import { Rule } from './types'
 
 const WRAPPER_GUTTER: Gutter | [Gutter, Gutter] = [0, 40]
 
-// Mock data - replace with actual data fetching
-const MOCK_RULES: Rule[] = [
-    {
-        id: '1',
-        name: 'Правило автоназначения',
-        description: 'Автоматически назначает исполнителя при создании тикета',
-        createdAt: '2024-01-15',
-        status: 'active',
-    },
-    {
-        id: '2',
-        name: 'Уведомление о просрочке',
-        description: 'Отправляет уведомление если тикет не закрыт в срок',
-        createdAt: '2024-01-20',
-        status: 'active',
-    },
-    {
-        id: '3',
-        name: 'Эскалация приоритета',
-        description: 'Повышает приоритет тикета при определенных условиях',
-        createdAt: '2024-02-01',
-        status: 'inactive',
-    },
-]
-
 const RulesPage: PageComponentType = () => {
     const intl = useIntl()
     const router = useRouter()
+    const { organization } = useOrganization()
+    
+    const [rules, setRules] = useState<Rule[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [refreshKey, setRefreshKey] = useState(0)
     
     const PageTitle = 'Правила'
     const CreateRuleButton = 'Добавить правило'
@@ -79,17 +61,39 @@ const RulesPage: PageComponentType = () => {
         },
     ], [NameColumn, DescriptionColumn, CreatedAtColumn, StatusColumn])
 
-    const dataSource: GetTableData<Rule> = useCallback(async () => {
-        // Simulate async data fetching
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    rowData: MOCK_RULES,
-                    rowCount: MOCK_RULES.length,
+    // Fetch rules when organization changes
+    useEffect(() => {
+        const fetchRules = async () => {
+            if (!organization?.id) {
+                setRules([])
+                return
+            }
+
+            setIsLoading(true)
+            try {
+                const data = await getRules(organization.id)
+                setRules(data)
+            } catch (error) {
+                console.error('Error fetching rules:', error)
+                notification.error({
+                    message: 'Ошибка',
+                    description: 'Не удалось загрузить правила',
                 })
-            }, 100)
-        })
-    }, [])
+                setRules([])
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchRules()
+    }, [organization?.id, refreshKey])
+
+    const dataSource: GetTableData<Rule> = useCallback(async () => {
+        return {
+            rowData: rules,
+            rowCount: rules.length,
+        }
+    }, [rules])
 
     const handleCreateRule = () => {
         router.push('/rules/create')
