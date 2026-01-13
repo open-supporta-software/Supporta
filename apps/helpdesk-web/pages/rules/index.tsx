@@ -1,8 +1,8 @@
-import { Row, Col, notification } from 'antd'
+import { Row, Col } from 'antd'
 import { Gutter } from 'antd/es/grid/row'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import { useIntl } from '@open-condo/next/intl'
 import { useOrganization } from '@open-condo/next/organization'
@@ -17,21 +17,19 @@ import { Rule } from './types'
 
 const WRAPPER_GUTTER: Gutter | [Gutter, Gutter] = [0, 40]
 
+
+const PageTitle = 'Правила'
+const CreateRuleButton = 'Добавить правило'
+const NameColumn = 'Название'
+const DescriptionColumn = 'Описание'
+const CreatedAtColumn = 'Дата создания'
+
 const RulesPage: PageComponentType = () => {
     const intl = useIntl()
     const router = useRouter()
     const { organization } = useOrganization()
     
-    const [rules, setRules] = useState<Rule[]>([])
-    const [isLoading, setIsLoading] = useState(false)
     const [refreshKey, setRefreshKey] = useState(0)
-    
-    const PageTitle = 'Правила'
-    const CreateRuleButton = 'Добавить правило'
-    const NameColumn = 'Название'
-    const DescriptionColumn = 'Описание'
-    const CreatedAtColumn = 'Дата создания'
-    const StatusColumn = 'Статус'
 
     const columns: TableColumn<Rule>[] = useMemo(() => [
         {
@@ -39,61 +37,55 @@ const RulesPage: PageComponentType = () => {
             header: NameColumn,
             dataKey: 'name',
             initialSize: '25%',
+            render: (name) => name || 'Без названия',
         },
         {
             id: 'description',
             header: DescriptionColumn,
             dataKey: 'description',
             initialSize: '35%',
+            render: (description) => description || '-',
         },
         {
-            id: 'createdAt',
+            id: 'created_at',
             header: CreatedAtColumn,
-            dataKey: 'createdAt',
+            dataKey: 'created_at',
             initialSize: '20%',
-        },
-        {
-            id: 'status',
-            header: StatusColumn,
-            dataKey: 'status',
-            initialSize: '20%',
-            render: (status) => status === 'active' ? 'Активно' : 'Неактивно',
-        },
-    ], [NameColumn, DescriptionColumn, CreatedAtColumn, StatusColumn])
-
-    // Fetch rules when organization changes
-    useEffect(() => {
-        const fetchRules = async () => {
-            if (!organization?.id) {
-                setRules([])
-                return
-            }
-
-            setIsLoading(true)
-            try {
-                const data = await getRules(organization.id)
-                setRules(data)
-            } catch (error) {
-                console.error('Error fetching rules:', error)
-                notification.error({
-                    message: 'Ошибка',
-                    description: 'Не удалось загрузить правила',
+            render: (created_at) => {
+                if (!created_at) return '-'
+                return new Date(created_at).toLocaleString('ru-RU', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
                 })
-                setRules([])
-            } finally {
-                setIsLoading(false)
+            },
+        },
+    ], [NameColumn, DescriptionColumn, CreatedAtColumn])
+
+    const dataSource: GetTableData<Rule> = useCallback(async (tableState) => {
+        if (!organization?.id) {
+            return {
+                rowData: [],
+                rowCount: 0,
             }
         }
 
-        fetchRules()
-    }, [organization?.id, refreshKey])
-
-    const dataSource: GetTableData<Rule> = useCallback(async () => {
-        return {
-            rowData: rules,
-            rowCount: rules.length,
+        try {
+            const data = await getRules(organization.id)
+            return {
+                rowData: data,
+                rowCount: data.length,
+            }
+        } catch (error) {
+            console.error('Error fetching rules:', error)
+            return {
+                rowData: [],
+                rowCount: 0,
+            }
         }
-    }, [rules])
+    }, [organization?.id])
 
     const handleCreateRule = () => {
         router.push('/rules/create')
@@ -116,6 +108,7 @@ const RulesPage: PageComponentType = () => {
                         </Col>
                         <Col span={24}>
                             <Table
+                                key={refreshKey}
                                 id='rules-table'
                                 dataSource={dataSource}
                                 columns={columns}

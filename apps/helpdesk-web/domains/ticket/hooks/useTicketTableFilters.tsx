@@ -442,6 +442,23 @@ export function useTicketTableFilters (): Array<FiltersMeta<TicketWhereInput, Ti
                 },
             },
             {
+                keyword: 'type',
+                filters: [filterTicketType],
+                component: {
+                    type: ComponentType.Select,
+                    options: ticketTypeOptions,
+                    props: {
+                        loading: false,
+                        showArrow: true,
+                        placeholder: SelectMessage,
+                    },
+                    modalFilterComponentWrapper: {
+                        label: TicketTypeMessage,
+                        size: FilterComponentSize.Small,
+                    },
+                },
+            },
+            {
                 keyword: 'commentsByType',
                 filters: [filterCommentsByType],
                 component: {

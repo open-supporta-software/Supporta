@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow'
 
 import { Select, Input } from '@open-condo/ui'
 
-import { TRIGGER_ACTIONS, TERNARY_ACTIONS, CONDITION_ACTIONS, ACTION_ACTIONS, NODE_COLORS } from '../constants'
+import { TRIGGER_TYPES, TERNARY_ACTIONS, CONDITION_ACTIONS, ACTION_ACTIONS, NODE_COLORS } from '../constants'
 import { RuleNodeData } from '../types'
 
 interface NodeProps {
@@ -30,12 +30,12 @@ export const TriggerNode: React.FC<NodeProps> = ({ data }) => {
             <div style={{ marginBottom: '8px', fontWeight: 'bold', color: NODE_COLORS.trigger.text }}>
                 Триггер
             </div>
-            <div className='nodrag'>
+            <div className='nodrag' style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <Select
-                    value={data.action}
-                    onChange={data.onChange}
-                    options={TRIGGER_ACTIONS}
-                    placeholder='Выберите триггер'
+                    value={data.triggerType}
+                    onChange={data.onTriggerTypeChange}
+                    options={TRIGGER_TYPES}
+                    placeholder='Выберите тип триггера'
                 />
             </div>
             <Handle 

@@ -2,7 +2,7 @@ import { Row, Col, notification } from 'antd'
 import { Gutter } from 'antd/es/grid/row'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import React, { useCallback, useState, useRef } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import ReactFlow, {
     Node,
     Edge,
@@ -27,9 +27,9 @@ import { Typography, Input, Alert, Button } from '@open-condo/ui'
 import { PageContent, PageWrapper } from '@condo/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@condo/domains/common/types'
 
-import { createRule } from './api'
-import { TriggerNode, TernaryNode, ConditionNode, ActionNode } from './components/CustomNodes'
-import { NodeType } from './types'
+import { getRule, updateRule } from '../api'
+import { TriggerNode, TernaryNode, ConditionNode, ActionNode } from '../components/CustomNodes'
+import { NodeType } from '../types'
 
 const WRAPPER_GUTTER: Gutter | [Gutter, Gutter] = [0, 40]
 
@@ -40,25 +40,6 @@ const nodeTypes: NodeTypes = {
     condition: ConditionNode,
     action: ActionNode,
 }
-
-// Initial nodes
-const initialNodes: Node[] = [
-    {
-        id: '1',
-        type: 'trigger',
-        position: { x: 250, y: 50 },
-        data: { 
-            action: '', 
-            onChange: () => {},
-            conditionValue: '',
-            onConditionValueChange: () => {},
-            triggerType: 'NEW_TICKET',
-            onTriggerTypeChange: () => {},
-        },
-    },
-]
-
-const initialEdges: Edge[] = []
 
 // Validation function for node connections
 const isValidConnection = (
@@ -104,8 +85,9 @@ const FlowContent: React.FC = () => {
     const intl = useIntl()
     const router = useRouter()
     const { organization } = useOrganization()
+    const { id } = router.query
     
-    const PageTitle = 'Создание правила'
+    const PageTitle = 'Редактирование правила'
     const NameLabel = 'Название'
     const DescriptionLabel = 'Описание'
     const NamePlaceholder = 'Введите название правила'
@@ -114,13 +96,49 @@ const FlowContent: React.FC = () => {
     const [ruleName, setRuleName] = useState('')
     const [ruleDescription, setRuleDescription] = useState('')
     const [triggerType, setTriggerType] = useState('NEW_TICKET')
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const [connectionError, setConnectionError] = useState<string | null>(null)
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null)
     const contextMenuPositionRef = useRef<{ x: number, y: number } | null>(null)
     const [isNodePanelOpen, setIsNodePanelOpen] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    // Load rule data
+    useEffect(() => {
+        const loadRule = async () => {
+            if (!id || typeof id !== 'string') return
+
+            setIsLoading(true)
+            try {
+                const rule = await getRule(id)
+                setRuleName(rule.name || '')
+                setRuleDescription(rule.description || '')
+                setTriggerType(rule.trigger_type || 'NEW_TICKET')
+
+                // Parse flow data
+                const flowData = JSON.parse(rule.flow)
+                if (flowData.nodes) {
+                    setNodes(flowData.nodes)
+                }
+                if (flowData.edges) {
+                    setEdges(flowData.edges)
+                }
+            } catch (error) {
+                console.error('Error loading rule:', error)
+                notification.error({
+                    message: 'Ошибка',
+                    description: 'Не удалось загрузить правило',
+                })
+                router.push('/rules')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadRule()
+    }, [id, router])
 
     const onConnect = useCallback(
         (params: Connection | Edge) => {
@@ -256,13 +274,7 @@ const FlowContent: React.FC = () => {
     }, [])
 
     const handleSaveFlow = useCallback(async () => {
-        if (!organization?.id) {
-            notification.error({
-                message: 'Ошибка',
-                description: 'Организация не выбрана',
-            })
-            return
-        }
+        if (!id || typeof id !== 'string') return
 
         const flowData = {
             nodes: nodes.map(node => ({
@@ -286,70 +298,28 @@ const FlowContent: React.FC = () => {
         
         setIsSaving(true)
         try {
-            const result = await createRule({
+            await updateRule(id, {
                 name: ruleName,
                 description: ruleDescription,
                 flow: JSON.stringify(flowData),
-                organization_id: organization.id,
-                trigger_type: triggerType,
             })
             
             notification.success({
                 message: 'Успешно',
-                description: `Правило "${ruleName}" сохранено`,
+                description: `Правило "${ruleName}" обновлено`,
             })
             
-            // Redirect to rules list or edit page
             router.push('/rules')
         } catch (error) {
-            console.error('Error saving rule:', error)
+            console.error('Error updating rule:', error)
             notification.error({
                 message: 'Ошибка',
-                description: error instanceof Error ? error.message : 'Не удалось сохранить правило',
+                description: error instanceof Error ? error.message : 'Не удалось обновить правило',
             })
         } finally {
             setIsSaving(false)
         }
-    }, [ruleName, ruleDescription, triggerType, nodes, edges, organization, router])
-
-    const handleExportToJSON = useCallback(() => {
-        const flowData = {
-            name: ruleName,
-            description: ruleDescription,
-            trigger_type: triggerType,
-            nodes: nodes.map(node => ({
-                id: node.id,
-                type: node.type,
-                position: node.position,
-                data: {
-                    action: node.data.action,
-                    conditionValue: node.data.conditionValue,
-                    triggerType: node.data.triggerType,
-                },
-            })),
-            edges: edges.map(edge => ({
-                id: edge.id,
-                source: edge.source,
-                target: edge.target,
-                sourceHandle: edge.sourceHandle,
-                targetHandle: edge.targetHandle,
-            })),
-            createdAt: new Date().toISOString(),
-        }
-
-        const jsonString = JSON.stringify(flowData, null, 2)
-        const blob = new Blob([jsonString], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `rule_${ruleName.replace(/\s+/g, '_').toLowerCase() || 'unnamed'}_${Date.now()}.json`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-    }, [ruleName, ruleDescription, triggerType, nodes, edges])
-
-
+    }, [id, ruleName, ruleDescription, nodes, edges, router])
 
     return (
         <>
@@ -626,37 +596,24 @@ const FlowContent: React.FC = () => {
                             </div>
                         </Col>
                         <Col span={24}>
-                            <Row gutter={[16, 16]} justify='space-between'>
+                            <Row gutter={[16, 16]} justify='end'>
                                 <Col>
                                     <Button
                                         type='secondary'
-                                        onClick={handleExportToJSON}
-                                        disabled={!ruleName || nodes.length === 0}
+                                        onClick={() => router.push('/rules')}
                                     >
-                                        Экспорт в JSON
+                                        Отмена
                                     </Button>
                                 </Col>
                                 <Col>
-                                    <Row gutter={[16, 16]}>
-                                        <Col>
-                                            <Button
-                                                type='secondary'
-                                                onClick={() => router.push('/rules')}
-                                            >
-                                                Отмена
-                                            </Button>
-                                        </Col>
-                                        <Col>
-                                            <Button
-                                                type='primary'
-                                                onClick={handleSaveFlow}
-                                                disabled={!ruleName || nodes.length === 0 || isSaving || !organization?.id}
-                                                loading={isSaving}
-                                            >
-                                                Сохранить правило
-                                            </Button>
-                                        </Col>
-                                    </Row>
+                                    <Button
+                                        type='primary'
+                                        onClick={handleSaveFlow}
+                                        disabled={!ruleName || nodes.length === 0 || isSaving}
+                                        loading={isSaving}
+                                    >
+                                        Сохранить изменения
+                                    </Button>
                                 </Col>
                             </Row>
                         </Col>
@@ -667,10 +624,10 @@ const FlowContent: React.FC = () => {
     )
 }
 
-const CreateRulePage: PageComponentType = () => (
+const EditRulePage: PageComponentType = () => (
     <ReactFlowProvider>
         <FlowContent />
     </ReactFlowProvider>
 )
 
-export default CreateRulePage
+export default EditRulePage

@@ -192,9 +192,6 @@ const SearchByPhoneSelectOption = ({ phone, property, unitName, unitType, type, 
                             {renderPhone(phone)}
                         </Typography.Text>
                     </Col>
-                    <Col span={16}>
-                        {property ? getAddressRender(property, unitNameMessage, DeletedMessage, breakpoints.TABLET_LARGE) : DeletedMessage}
-                    </Col>
                 </Row>
             </Col>
             {

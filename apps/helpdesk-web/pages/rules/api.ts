@@ -2,11 +2,11 @@ import getConfig from 'next/config'
 
 import { getRequest, postRequest, putRequest } from '@helpdesk-web/domains/common/utils/http'
 
-import { Rule, CreateRuleInput, UpdateRuleInput } from './types'
+import { Rule, CreateRuleInput, UpdateRuleInput, RulesResponse } from './types'
 
 const getRulesServerDomain = (): string => {
     const { publicRuntimeConfig } = getConfig()
-    return publicRuntimeConfig?.rules_server_domain || publicRuntimeConfig?.serverUrl || ''
+    return publicRuntimeConfig?.rulesServerDomain || publicRuntimeConfig?.serverUrl || ''
 }
 
 /**
@@ -15,7 +15,7 @@ const getRulesServerDomain = (): string => {
  */
 export const createRule = async (input: CreateRuleInput): Promise<Rule> => {
     const baseUrl = getRulesServerDomain()
-    const path = `${baseUrl}/api/rules`
+    const path = `${baseUrl}/rules`
     
     return postRequest<Rule>(path, {
         data: input,
@@ -28,13 +28,15 @@ export const createRule = async (input: CreateRuleInput): Promise<Rule> => {
  */
 export const getRules = async (organizationId: string): Promise<Rule[]> => {
     const baseUrl = getRulesServerDomain()
-    const path = `${baseUrl}/api/rules`
+    const path = `${baseUrl}/rules`
     
-    return getRequest<Rule[]>(path, {
+    const response = await getRequest<RulesResponse>(path, {
         query: {
             organization_id: organizationId,
         },
     })
+    
+    return response.items || []
 }
 
 /**
@@ -43,7 +45,7 @@ export const getRules = async (organizationId: string): Promise<Rule[]> => {
  */
 export const getRule = async (id: string): Promise<Rule> => {
     const baseUrl = getRulesServerDomain()
-    const path = `${baseUrl}/api/rules/${id}`
+    const path = `${baseUrl}/rules/${id}`
     
     return getRequest<Rule>(path)
 }
@@ -54,7 +56,7 @@ export const getRule = async (id: string): Promise<Rule> => {
  */
 export const updateRule = async (id: string, input: UpdateRuleInput): Promise<Rule> => {
     const baseUrl = getRulesServerDomain()
-    const path = `${baseUrl}/api/rules/${id}`
+    const path = `${baseUrl}/rules/${id}`
     
     return putRequest<Rule>(path, {
         data: input,

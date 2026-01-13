@@ -1,11 +1,7 @@
 import { NodeAction } from './types'
 
-export const TRIGGER_ACTIONS: NodeAction[] = [
-    { label: 'Новый тикет создан', value: 'ticket_created' },
-    { label: 'Тикет обновлен', value: 'ticket_updated' },
-    { label: 'Тикет закрыт', value: 'ticket_closed' },
-    { label: 'Тикет назначен', value: 'ticket_assigned' },
-    { label: 'Комментарий добавлен', value: 'comment_added' },
+export const TRIGGER_TYPES: NodeAction[] = [
+    { label: 'Новый тикет', value: 'NEW_TICKET' },
 ]
 
 export const TERNARY_ACTIONS: NodeAction[] = [
@@ -15,16 +11,15 @@ export const TERNARY_ACTIONS: NodeAction[] = [
 
 export const CONDITION_ACTIONS: NodeAction[] = [
     { label: 'Если статус равен', value: 'if_status_equals' },
-    { label: 'Если приоритет выше', value: 'if_priority_higher' },
     { label: 'Если исполнитель назначен', value: 'if_executor_assigned' },
-    { label: 'Если категория равна', value: 'if_category_equals' },
+    { label: 'Если ответственный назначен', value: 'if_manager_assigned' },
 ]
 
 export const ACTION_ACTIONS: NodeAction[] = [
-    { label: 'Назначить исполнителя', value: 'assign_executor' },
-    { label: 'Изменить статус', value: 'change_status' },
+    { label: 'Назначить свободного исполнителя', value: 'assign_available_executor' },
+    { label: 'Назначить свободного ответственного', value: 'assign_available_manager' },
+    { label: 'Отменить тикет', value: 'decline_ticket' },
     { label: 'Отправить ответ', value: 'send_answer' },
-    { label: 'Изменить приоритет', value: 'change_priority' },
 ]
 
 export const NODE_COLORS = {

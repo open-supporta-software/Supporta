@@ -9,9 +9,9 @@ import { Button, Dropdown, DropdownProps } from '@open-condo/ui'
 import { useLayoutContext } from '@condo/domains/common/components/LayoutContext'
 import { MenuItem } from '@condo/domains/common/components/MenuItem'
 import { fontSizes } from '@condo/domains/common/constants/style'
-import { useSearchByPhoneModal } from '@condo/domains/common/hooks/useSearchByPhoneModal'
 import { useTicketVisibility } from '@condo/domains/ticket/contexts/TicketVisibilityContext'
 import { searchByPhone } from '@condo/domains/ticket/utils/clientSchema/clientCard'
+import { useSearchByPhoneModal } from '@helpdesk-web/domains/common/hooks/useSearchByPhoneModal'
 
 import styles from './ResidentActions.module.css'
 
