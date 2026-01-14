@@ -9,11 +9,11 @@ import { useOrganization } from '@open-condo/next/organization'
 import { Typography, Button, ActionBar, Table } from '@open-condo/ui'
 import type { TableColumn, GetTableData } from '@open-condo/ui'
 
+import { getRules } from '../../domains/rules/api'
+import { Rule } from '../../domains/rules/types'
 import { PageContent, PageWrapper } from '@condo/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@condo/domains/common/types'
 
-import { getRules } from './api'
-import { Rule } from './types'
 
 const WRAPPER_GUTTER: Gutter | [Gutter, Gutter] = [0, 40]
 

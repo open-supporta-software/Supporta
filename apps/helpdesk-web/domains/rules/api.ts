@@ -2,6 +2,7 @@ import getConfig from 'next/config'
 
 import { getRequest, postRequest, putRequest } from '@helpdesk-web/domains/common/utils/http'
 
+
 import { Rule, CreateRuleInput, UpdateRuleInput, RulesResponse } from './types'
 
 const getRulesServerDomain = (): string => {

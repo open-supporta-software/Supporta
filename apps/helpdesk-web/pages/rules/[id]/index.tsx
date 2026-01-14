@@ -24,12 +24,12 @@ import { useIntl } from '@open-condo/next/intl'
 import { useOrganization } from '@open-condo/next/organization'
 import { Typography, Input, Alert, Button } from '@open-condo/ui'
 
+
+import { getRule, updateRule } from '../../../domains/rules/api'
+import { TriggerNode, TernaryNode, ConditionNode, ActionNode } from '../../../domains/rules/components/CustomNodes'
+import { NodeType } from '../../../domains/rules/types'
 import { PageContent, PageWrapper } from '@condo/domains/common/components/containers/BaseLayout'
 import { PageComponentType } from '@condo/domains/common/types'
-
-import { getRule, updateRule } from '../api'
-import { TriggerNode, TernaryNode, ConditionNode, ActionNode } from '../components/CustomNodes'
-import { NodeType } from '../types'
 
 const WRAPPER_GUTTER: Gutter | [Gutter, Gutter] = [0, 40]
 
