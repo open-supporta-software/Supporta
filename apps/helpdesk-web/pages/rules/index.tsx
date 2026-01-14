@@ -31,7 +31,7 @@ const RulesPage: PageComponentType = () => {
     
     const [refreshKey, setRefreshKey] = useState(0)
 
-    const columns: TableColumn<Rule>[] = useMemo(() => [
+    const columns = useMemo(() => [
         {
             id: 'name',
             header: NameColumn,
@@ -111,7 +111,7 @@ const RulesPage: PageComponentType = () => {
                                 key={refreshKey}
                                 id='rules-table'
                                 dataSource={dataSource}
-                                columns={columns}
+                                columns={columns as any}
                                 onRowClick={handleRowClick}
                             />
                         </Col>
