@@ -130,6 +130,9 @@ export const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 }
 
 export const ActionNode: React.FC<NodeProps> = ({ data }) => {
+    const selectedAction = ACTION_ACTIONS.find(action => action.value === data.action)
+    const shouldShowInput = selectedAction?.requiresInput ?? false
+
     return (
         <div style={{
             padding: '16px',
@@ -155,7 +158,7 @@ export const ActionNode: React.FC<NodeProps> = ({ data }) => {
                     options={ACTION_ACTIONS}
                     placeholder='Выберите действие'
                 />
-                {data.action && (
+                {data.action && shouldShowInput && (
                     <Input
                         value={data.conditionValue || ''}
                         onChange={(e) => data.onConditionValueChange?.(e.target.value)}

@@ -32,6 +32,7 @@ export interface UpdateRuleInput {
 export interface NodeAction {
     label: string
     value: string
+    requiresInput?: boolean
 }
 
 export interface RuleNodeData {

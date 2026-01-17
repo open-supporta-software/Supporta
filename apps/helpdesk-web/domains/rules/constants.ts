@@ -16,10 +16,10 @@ export const CONDITION_ACTIONS: NodeAction[] = [
 ]
 
 export const ACTION_ACTIONS: NodeAction[] = [
-    { label: 'Назначить свободного исполнителя', value: 'assign_available_executor' },
-    { label: 'Назначить свободного ответственного', value: 'assign_available_manager' },
-    { label: 'Отменить тикет', value: 'decline_ticket' },
-    { label: 'Отправить ответ', value: 'send_answer' },
+    { label: 'Назначить свободного исполнителя', value: 'assign_available_executor', requiresInput: false },
+    { label: 'Назначить свободного ответственного', value: 'assign_available_manager', requiresInput: false },
+    { label: 'Отменить тикет', value: 'decline_ticket', requiresInput: false },
+    { label: 'Отправить ответ', value: 'send_answer', requiresInput: true },
 ]
 
 export const NODE_COLORS = {
