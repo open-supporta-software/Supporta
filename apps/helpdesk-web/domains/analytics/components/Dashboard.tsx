@@ -7,22 +7,16 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 
-import { Wallet, LayoutList, Smile, Frown } from '@open-condo/icons'
+import { LayoutList, Smile, Frown } from '@open-condo/icons'
 import { getClientSideSenderInfo } from '@open-condo/miniapp-utils/helpers/sender'
 import { useLazyQuery } from '@open-condo/next/apollo'
 import { useIntl } from '@open-condo/next/intl'
 import { Card, Typography, Space, Modal } from '@open-condo/ui'
 
 import {
-    TicketByPropertyChart,
     TicketByExecutorChart,
     TicketQualityControlChart,
-    ResidentByPropertyChart,
     AllTicketsChart,
-    PaymentByPropertyChart,
-    PaymentReceiptChart,
-    TicketByCategoryChart,
-    PaymentTotalChart,
 } from '@condo/domains/analytics/components/charts'
 import { GET_OVERVIEW_DASHBOARD_MUTATION } from '@condo/domains/analytics/gql'
 import { usePropertyFilter, useDateRangeFilter } from '@condo/domains/analytics/hooks/useDashboardFilters'
@@ -33,8 +27,8 @@ import { useWindowSize } from '@condo/domains/common/hooks/useWindowSize'
 import { parseQuery, getPageIndexFromOffset } from '@condo/domains/common/utils/tables.utils'
 import { QUALITY_CONTROL_VALUES } from '@condo/domains/ticket/constants/qualityControl'
 import { Ticket as TicketGQL } from '@condo/domains/ticket/gql'
-import { useTicketQualityTableColumns } from '@condo/domains/ticket/hooks/useTableColumns'
 import { GET_TICKETS_COUNT_QUERY } from '@condo/domains/ticket/utils/clientSchema/search'
+import { useTicketQualityTableColumns } from '@helpdesk-web/domains/ticket/hooks/useTableColumns'
 
 import type { OverviewData } from '@app/condo/schema'
 import type { RowProps } from 'antd'
@@ -371,9 +365,6 @@ const TicketQualityControlDashboard = ({ data, translations, loading, organizati
                         <DateRangeSearch disabled={ticketsLoading || ticketFeedbackLoading} />
                     </Col>
                     <Col span={24}>
-                        {SearchInput}
-                    </Col>
-                    <Col span={24}>
                         <TicketQualityControlChart data={[localData, translations]} loading={ticketFeedbackLoading} />
                     </Col>
                     <Col span={24}>
@@ -424,18 +415,12 @@ export const Dashboard: React.FC<{ organizationId: string }> = ({ organizationId
     }, [organizationId, loadDashboardData, dateRange, propertyIds])
 
     const newTickets = get(overview, 'ticketByDay.tickets', [])
-    const propertyTickets = get(overview, 'ticketByProperty.tickets', [])
-    const categoryTickets = get(overview, 'ticketByCategory.tickets', [])
     const executorTickets = get(overview, 'ticketByExecutor.tickets', [])
     const ticketQualityControlValue = get(overview, 'ticketQualityControlValue.tickets', [])
     const ticketQualityControlValueTranslations = get(overview, 'ticketQualityControlValue.translations', [])
     const propertyData = get(overview, 'property.sum', 0)
-    const paymentsData = get(overview, 'payment.payments', [])
     const paymentSum = get(overview, 'payment.sum', null)
-    const receiptsData = get(overview, 'receipt.receipts', [])
     const residentsData = get(overview, 'resident.residents', [])
-    const incidentsCount = get(overview, 'incident.count', 0)
-    const chargedToPaidData = paymentsData.length > 0 && receiptsData.length > 0 ? [paymentsData, receiptsData] : []
 
     return (
         <Row gutter={DASHBOARD_ROW_GUTTER}>
