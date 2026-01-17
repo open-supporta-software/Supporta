@@ -631,6 +631,185 @@ export type GetCustomValuesForObjectQueryHookResult = ReturnType<typeof useGetCu
 export type GetCustomValuesForObjectLazyQueryHookResult = ReturnType<typeof useGetCustomValuesForObjectLazyQuery>;
 export type GetCustomValuesForObjectSuspenseQueryHookResult = ReturnType<typeof useGetCustomValuesForObjectSuspenseQuery>;
 export type GetCustomValuesForObjectQueryResult = Apollo.QueryResult<Types.GetCustomValuesForObjectQuery, Types.GetCustomValuesForObjectQueryVariables>;
+export const GetUserMessagesDocument = gql`
+    query getUserMessages($userId: ID, $organizationIds: [ID], $types: [MessageType!], $skip: Int = 0) {
+  messages: allMessages(
+    where: {user: {id: $userId}, organization: {id_in: $organizationIds}, type_in: $types}
+    first: 10
+    skip: $skip
+    sortBy: [createdAt_DESC]
+  ) {
+    id
+    type
+    createdAt
+    meta
+    defaultContent {
+      content
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetUserMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetUserMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserMessagesQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      organizationIds: // value for 'organizationIds'
+ *      types: // value for 'types'
+ *      skip: // value for 'skip'
+ *   },
+ * });
+ */
+export function useGetUserMessagesQuery(baseOptions?: Apollo.QueryHookOptions<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>(GetUserMessagesDocument, options);
+      }
+export function useGetUserMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>(GetUserMessagesDocument, options);
+        }
+export function useGetUserMessagesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>(GetUserMessagesDocument, options);
+        }
+export type GetUserMessagesQueryHookResult = ReturnType<typeof useGetUserMessagesQuery>;
+export type GetUserMessagesLazyQueryHookResult = ReturnType<typeof useGetUserMessagesLazyQuery>;
+export type GetUserMessagesSuspenseQueryHookResult = ReturnType<typeof useGetUserMessagesSuspenseQuery>;
+export type GetUserMessagesQueryResult = Apollo.QueryResult<Types.GetUserMessagesQuery, Types.GetUserMessagesQueryVariables>;
+export const GetNotificationUserSettingsDocument = gql`
+    query getNotificationUserSettings($userId: ID!, $types: [MessageType!]) {
+  allNotificationUserSettings(
+    where: {OR: [{user: {id: $userId}}, {user_is_null: true}], messageType_in: $types}
+  ) {
+    id
+    user {
+      id
+    }
+    messageType
+    messageTransport
+    isEnabled
+  }
+}
+    `;
+
+/**
+ * __useGetNotificationUserSettingsQuery__
+ *
+ * To run a query within a React component, call `useGetNotificationUserSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNotificationUserSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNotificationUserSettingsQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      types: // value for 'types'
+ *   },
+ * });
+ */
+export function useGetNotificationUserSettingsQuery(baseOptions: Apollo.QueryHookOptions<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables> & ({ variables: Types.GetNotificationUserSettingsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>(GetNotificationUserSettingsDocument, options);
+      }
+export function useGetNotificationUserSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>(GetNotificationUserSettingsDocument, options);
+        }
+export function useGetNotificationUserSettingsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>(GetNotificationUserSettingsDocument, options);
+        }
+export type GetNotificationUserSettingsQueryHookResult = ReturnType<typeof useGetNotificationUserSettingsQuery>;
+export type GetNotificationUserSettingsLazyQueryHookResult = ReturnType<typeof useGetNotificationUserSettingsLazyQuery>;
+export type GetNotificationUserSettingsSuspenseQueryHookResult = ReturnType<typeof useGetNotificationUserSettingsSuspenseQuery>;
+export type GetNotificationUserSettingsQueryResult = Apollo.QueryResult<Types.GetNotificationUserSettingsQuery, Types.GetNotificationUserSettingsQueryVariables>;
+export const CreateNotificationUserSettingDocument = gql`
+    mutation createNotificationUserSetting($userId: ID!, $messageType: MessageType!, $isEnabled: Boolean!, $sender: SenderFieldInput!) {
+  createNotificationUserSetting(
+    data: {user: {connect: {id: $userId}}, messageType: $messageType, messageTransport: push, isEnabled: $isEnabled, sender: $sender, dv: 1}
+  ) {
+    id
+  }
+}
+    `;
+export type CreateNotificationUserSettingMutationFn = Apollo.MutationFunction<Types.CreateNotificationUserSettingMutation, Types.CreateNotificationUserSettingMutationVariables>;
+
+/**
+ * __useCreateNotificationUserSettingMutation__
+ *
+ * To run a mutation, you first call `useCreateNotificationUserSettingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateNotificationUserSettingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createNotificationUserSettingMutation, { data, loading, error }] = useCreateNotificationUserSettingMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      messageType: // value for 'messageType'
+ *      isEnabled: // value for 'isEnabled'
+ *      sender: // value for 'sender'
+ *   },
+ * });
+ */
+export function useCreateNotificationUserSettingMutation(baseOptions?: Apollo.MutationHookOptions<Types.CreateNotificationUserSettingMutation, Types.CreateNotificationUserSettingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<Types.CreateNotificationUserSettingMutation, Types.CreateNotificationUserSettingMutationVariables>(CreateNotificationUserSettingDocument, options);
+      }
+export type CreateNotificationUserSettingMutationHookResult = ReturnType<typeof useCreateNotificationUserSettingMutation>;
+export type CreateNotificationUserSettingMutationResult = Apollo.MutationResult<Types.CreateNotificationUserSettingMutation>;
+export type CreateNotificationUserSettingMutationOptions = Apollo.BaseMutationOptions<Types.CreateNotificationUserSettingMutation, Types.CreateNotificationUserSettingMutationVariables>;
+export const UpdateNotificationUserSettingDocument = gql`
+    mutation updateNotificationUserSetting($id: ID!, $isEnabled: Boolean!, $sender: SenderFieldInput!) {
+  updateNotificationUserSetting(
+    id: $id
+    data: {isEnabled: $isEnabled, sender: $sender, dv: 1}
+  ) {
+    id
+  }
+}
+    `;
+export type UpdateNotificationUserSettingMutationFn = Apollo.MutationFunction<Types.UpdateNotificationUserSettingMutation, Types.UpdateNotificationUserSettingMutationVariables>;
+
+/**
+ * __useUpdateNotificationUserSettingMutation__
+ *
+ * To run a mutation, you first call `useUpdateNotificationUserSettingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateNotificationUserSettingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateNotificationUserSettingMutation, { data, loading, error }] = useUpdateNotificationUserSettingMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      isEnabled: // value for 'isEnabled'
+ *      sender: // value for 'sender'
+ *   },
+ * });
+ */
+export function useUpdateNotificationUserSettingMutation(baseOptions?: Apollo.MutationHookOptions<Types.UpdateNotificationUserSettingMutation, Types.UpdateNotificationUserSettingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<Types.UpdateNotificationUserSettingMutation, Types.UpdateNotificationUserSettingMutationVariables>(UpdateNotificationUserSettingDocument, options);
+      }
+export type UpdateNotificationUserSettingMutationHookResult = ReturnType<typeof useUpdateNotificationUserSettingMutation>;
+export type UpdateNotificationUserSettingMutationResult = Apollo.MutationResult<Types.UpdateNotificationUserSettingMutation>;
+export type UpdateNotificationUserSettingMutationOptions = Apollo.BaseMutationOptions<Types.UpdateNotificationUserSettingMutation, Types.UpdateNotificationUserSettingMutationVariables>;
 export const AcceptOrRejectOrganizationEmployeeRequestDocument = gql`
     mutation acceptOrRejectOrganizationEmployeeRequest($data: AcceptOrRejectOrganizationEmployeeRequestInput!) {
   request: acceptOrRejectOrganizationEmployeeRequest(data: $data) {

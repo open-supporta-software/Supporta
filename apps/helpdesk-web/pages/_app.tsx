@@ -150,7 +150,7 @@ const MenuItems: React.FC = () => {
                 {
                     id: 'menu-item-ticket',
                     path: 'rules',
-                    icon: AllIcons['NewAppeal'],
+                    icon: AllIcons['LayoutList'],
                     label: 'Правила',
                     access: true,
                 },
