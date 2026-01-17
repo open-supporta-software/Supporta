@@ -39,6 +39,7 @@ const SSR_PROXY_CONFIG = JSON.parse(conf['SSR_PROXY_CONFIG'] || '{}')
 const TRUSTED_PROXIES_CONFIG = JSON.parse(conf['TRUSTED_PROXIES_CONFIG'] || '{}')
 const API_PROXY_CONFIG = JSON.parse(conf['API_PROXY_CONFIG'] || '{}')
 const activeMiniappIds = JSON.parse(conf['ACTIVE_MINIAPP_IDS'] || '[]')
+const autoConnectMiniappId = conf['AUTO_CONNECT_MINIAPP_ID'] || null
 const GRAPHQL_PROXY_NAME = conf['GRAPHQL_PROXY_NAME'] || 'Next'
 
 const hCaptcha = conf['HCAPTCHA_CONFIG'] && JSON.parse(conf['HCAPTCHA_CONFIG'])
@@ -80,6 +81,7 @@ const nextConfig: NextConfig = {
         defaultStaffAuthMethods,
         isDisabledSsr,
         activeMiniappIds,
+        autoConnectMiniappId,
         currentVersion: getCurrentVersion(),
         isSnowfallDisabled,
         termsOfUseUrl,
