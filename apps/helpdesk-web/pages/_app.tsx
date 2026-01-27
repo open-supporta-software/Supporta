@@ -145,6 +145,18 @@ const MenuItems: React.FC = () => {
             ].filter(checkItemAccess),
         },
         {
+            key: 'COMMUNICATION_CATEGORY',
+            items: [
+                {
+                    id: 'menu-item-ticket',
+                    path: 'rules',
+                    icon: AllIcons['LayoutList'],
+                    label: 'Правила',
+                    access: true,
+                },
+            ].filter(checkItemAccess),
+        },
+        {
             key: RESIDENTS_CATEGORY,
             items: [
                 {

@@ -25,12 +25,13 @@ import { FormItem } from '@condo/domains/common/components/Form/FormItem'
 import { SKIP_SEARCH_ORGANIZATION_BY_TIN } from '@condo/domains/common/constants/featureflags'
 import { useMutationErrorHandler } from '@condo/domains/common/hooks/useMutationErrorHandler'
 import { useValidations } from '@condo/domains/common/hooks/useValidations'
+import { B2BAppContext } from '@condo/domains/miniapp/utils/clientSchema'
 import { MANAGING_COMPANY_TYPE, SERVICE_PROVIDER_TYPE } from '@condo/domains/organization/constants/common'
 import { SecondaryLink } from '@condo/domains/user/components/auth/SecondaryLink'
 import { REQUEST_LIMIT_ERRORS } from '@condo/domains/user/constants/errors'
 
 
-const { publicRuntimeConfig: { defaultLocale, HelpRequisites } } = getConfig()
+const { publicRuntimeConfig: { defaultLocale, HelpRequisites, autoConnectMiniappId } } = getConfig()
 
 const generateFakeTin = (): string => {
     return Math.floor(1000000000 + Math.random() * 9000000000).toString()
@@ -210,6 +211,10 @@ export const CreateOrganizationForm: React.FC<CreateOrganizationFormProps> = (pr
         fetchPolicy: 'network-only',
     })
 
+    const createMiniappContext = B2BAppContext.useCreate({}, () => {
+        // Miniapp context created successfully
+    })
+
     const createOrganizationAction = useCallback(async (values) => {
         setIsOrganizationCreating(true)
         // Generate a fake TIN instead of using user input
@@ -294,6 +299,19 @@ export const CreateOrganizationForm: React.FC<CreateOrganizationFormProps> = (pr
             await onOrganizationCreated(registeredOrganization)
         }
         const organizationId = registeredOrganization?.id
+
+        // Auto-connect miniapp if configured
+        if (autoConnectMiniappId && organizationId) {
+            try {
+                await createMiniappContext({
+                    organization: { connect: { id: organizationId } },
+                    app: { connect: { id: autoConnectMiniappId } },
+                })
+            } catch (error) {
+                console.error('Failed to auto-connect miniapp:', error)
+                // Continue with organization creation even if miniapp connection fails
+            }
+        }
         const newOrganizationEmployeeData = await getOrganizationEmployee({
             variables: {
                 userId,
@@ -314,7 +332,7 @@ export const CreateOrganizationForm: React.FC<CreateOrganizationFormProps> = (pr
         }
         setIsOrganizationCreating(false)
     }, [
-        client, findOrganizationsByTin, getLastActiveOrganizationEmployeeRequest,
+        client, createMiniappContext, findOrganizationsByTin, getLastActiveOrganizationEmployeeRequest,
         getOrganizationEmployee, onEmployeeSelected, onOrganizationCreated, onSendOrganizationRequest,
         registerNewOrganization, selectEmployee, skipSearchOrganizationByTin, type, userId,
     ])

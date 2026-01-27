@@ -163,37 +163,6 @@ const PageContent: React.FC<PageContentProps> = ({
                     </Col>
                 </Row>
             </Col>
-            {Boolean(moreApps.length) && (
-                <Col span={FULL_COL_SPAN}>
-                    <Row gutter={TITLE_SPACING}>
-                        <Col span={FULL_COL_SPAN}>
-                            <Typography.Title level={2}>
-                                {MoreAppsMessage}
-                            </Typography.Title>
-                        </Col>
-                        <Col span={FULL_COL_SPAN}>
-                            <Carousel
-                                dots={false}
-                                autoplay={false}
-                                infinite={false}
-                                slidesToShow={carouselSlides}
-                            >
-                                {moreApps.map(app => (
-                                    <AppCard
-                                        key={app.id}
-                                        connected={app.connected && app.accessible}
-                                        name={app.name}
-                                        description={app.shortDescription}
-                                        logoUrl={app.logo}
-                                        label={app.label as B2BAppLabelType}
-                                        onClick={handleCardClick(app.id, app.connected)}
-                                    />
-                                ))}
-                            </Carousel>
-                        </Col>
-                    </Row>
-                </Col>
-            )}
         </Row>
     )
 }

@@ -82,6 +82,43 @@ export type GetCustomValuesForObjectQueryVariables = Types.Exact<{
 
 export type GetCustomValuesForObjectQuery = { __typename?: 'Query', customValues?: Array<{ __typename?: 'CustomValue', id: string, data?: any | null, sourceType?: Types.CustomValueSourceTypeType | null, sourceId?: string | null, customField?: { __typename?: 'CustomField', priority?: number | null, name?: string | null, type?: Types.CustomFieldTypeType | null } | null } | null> | null };
 
+export type GetUserMessagesQueryVariables = Types.Exact<{
+  userId?: Types.InputMaybe<Types.Scalars['ID']['input']>;
+  organizationIds?: Types.InputMaybe<Array<Types.InputMaybe<Types.Scalars['ID']['input']>> | Types.InputMaybe<Types.Scalars['ID']['input']>>;
+  types?: Types.InputMaybe<Array<Types.MessageType> | Types.MessageType>;
+  skip?: Types.InputMaybe<Types.Scalars['Int']['input']>;
+}>;
+
+
+export type GetUserMessagesQuery = { __typename?: 'Query', messages?: Array<{ __typename?: 'Message', id: string, type?: Types.MessageType | null, createdAt?: string | null, meta?: any | null, defaultContent?: { __typename?: 'MessageDefaultContentField', content?: string | null } | null } | null> | null };
+
+export type GetNotificationUserSettingsQueryVariables = Types.Exact<{
+  userId: Types.Scalars['ID']['input'];
+  types?: Types.InputMaybe<Array<Types.MessageType> | Types.MessageType>;
+}>;
+
+
+export type GetNotificationUserSettingsQuery = { __typename?: 'Query', allNotificationUserSettings?: Array<{ __typename?: 'NotificationUserSetting', id: string, messageType?: Types.MessageType | null, messageTransport?: Types.NotificationUserSettingMessageTransportType | null, isEnabled?: boolean | null, user?: { __typename?: 'User', id: string } | null } | null> | null };
+
+export type CreateNotificationUserSettingMutationVariables = Types.Exact<{
+  userId: Types.Scalars['ID']['input'];
+  messageType: Types.MessageType;
+  isEnabled: Types.Scalars['Boolean']['input'];
+  sender: Types.SenderFieldInput;
+}>;
+
+
+export type CreateNotificationUserSettingMutation = { __typename?: 'Mutation', createNotificationUserSetting?: { __typename?: 'NotificationUserSetting', id: string } | null };
+
+export type UpdateNotificationUserSettingMutationVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input'];
+  isEnabled: Types.Scalars['Boolean']['input'];
+  sender: Types.SenderFieldInput;
+}>;
+
+
+export type UpdateNotificationUserSettingMutation = { __typename?: 'Mutation', updateNotificationUserSetting?: { __typename?: 'NotificationUserSetting', id: string } | null };
+
 export type AcceptOrRejectOrganizationEmployeeRequestMutationVariables = Types.Exact<{
   data: Types.AcceptOrRejectOrganizationEmployeeRequestInput;
 }>;
